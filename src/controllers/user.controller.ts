@@ -1,4 +1,6 @@
 import { Request , Response } from "express-serve-static-core";
+import * as userServices from "../services/user.services"
+import bcrypt from "bcrypt";
 
 
 interface userRegister {
@@ -8,17 +10,27 @@ interface userRegister {
 }
 
 
+// SaltGen
+const salt = 10
+
 // Register Controller 
 
 export const registerUser = async ( request : Request, response : Response ) => {
     try {
+        const userData = request.body
 
-        const { fullName , email, password } : userRegister = request.body
+        if(!userData.password){
+            response.status(402).json({Error : "No Password Entered! "})
+            return;
+        }
 
-        response.status(202).json({ fullName : fullName, })
+        const hashedPassword = await bcrypt.hash(userData.password, salt);
+        userData.password = hashedPassword;
+        const newUser = await userServices.createUser(userData)
 
-    } catch (error) {
-        response.status(502).json({ ErrorMessage : error })
+        response.status(202).json({data : userData})
+    } catch (error : any) {
+        response.status(502).json({ ErrorMessage : error.message})
     }
 
 }
