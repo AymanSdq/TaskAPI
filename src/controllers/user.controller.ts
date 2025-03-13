@@ -10,14 +10,13 @@ interface userRegister {
 }
 
 
-// SaltGen
+// SaltGen  
 const salt = 10
 
 // Register Controller 
-
 export const registerUser = async ( request : Request, response : Response ) => {
     try {
-        const userData = request.body
+        const userData = await request.body
 
         if(!userData.password){
             response.status(402).json({Error : "No Password Entered! "})
@@ -26,7 +25,7 @@ export const registerUser = async ( request : Request, response : Response ) => 
 
         const hashedPassword = await bcrypt.hash(userData.password, salt);
         userData.password = hashedPassword;
-        const newUser = await userServices.createUser(userData)
+        const newUser = await userServices.createUserServices(userData)
 
         response.status(202).json({data : userData})
     } catch (error : any) {
@@ -36,3 +35,22 @@ export const registerUser = async ( request : Request, response : Response ) => 
 }
 
 // Login Controller
+export const loginUser = async ( request : Request, response : Response ) => {
+    try {
+        const userData = request.body
+
+        // If the Password is entered 
+        if(!userData.password){
+            response.status(402).json({ErrorMessage : "Password not entred!"})
+            return;
+        }
+
+        // Services to check the email if existe 
+        const checkEmail = await userServices.loginService(userData)
+
+        response.status(202).json({data : checkEmail})
+
+    } catch (error : any) {
+        response.status(502).json({Errormessage : error.message});
+    }
+}
