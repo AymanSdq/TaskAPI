@@ -1,5 +1,9 @@
 import { query } from "../Database/connect.db";
 import bcrypt from "bcrypt"
+import dotenv from 'dotenv'
+import jwt from "jsonwebtoken"
+
+dotenv.config()
 
 interface userData {
     fullName : string,
@@ -51,7 +55,21 @@ export const loginService = async ( userLogin : userLogin) => {
         return { ErrorMessage : "Email or Password are Incorrect "}
     }
 
-    return { Success : true, Message : "You are logged in Successfully"}
+    const getAllUserData = await query(
+        `SELECT userid, email, fullName FROM users
+        WHERE email = $1 AND password = $2`, [email, dbPassword]
+    )
+
+    const dataForToken = getAllUserData.rows[0]
+
+    const token = jwt.sign(
+        { userid : dataForToken.userid, email : dataForToken.email},
+        process.env.JWT_SECRET as string,
+        {expiresIn : process.env.JWT_EXPIRES_IN || "48h"} as jwt.SignOptions
+    );
+
+
+    return { Success : true, Message : token}
     
 }
 
