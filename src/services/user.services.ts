@@ -31,6 +31,7 @@ export const createUserServices = async (userData : userData) => {
 
 export const loginService = async ( userLogin : userLogin) => {
 
+
     const { email, password } = userLogin
     // Checking the email 
     const checkEmail = await query(
@@ -62,6 +63,7 @@ export const loginService = async ( userLogin : userLogin) => {
 
     const dataForToken = getAllUserData.rows[0]
 
+    // Token login Created      
     const token = jwt.sign(
         { userid : dataForToken.userid, email : dataForToken.email},
         process.env.JWT_SECRET as string,
@@ -72,4 +74,3 @@ export const loginService = async ( userLogin : userLogin) => {
     return { Success : true, Message : token}
     
 }
-
