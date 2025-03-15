@@ -1,6 +1,7 @@
 import { Request , Response } from "express-serve-static-core";
 import * as userServices from "../services/user.services"
 import bcrypt from "bcrypt";
+import { AuthRequest } from "../auth/auth.middleware";
 
 
 interface userRegister {
@@ -53,4 +54,10 @@ export const loginUser = async ( request : Request, response : Response ) => {
     } catch (error : any) {
         response.status(502).json({Errormessage : error.message});
     }
+}
+
+// edit profile 
+export const editUser = async ( request : AuthRequest, response : Response ) => {
+
+    response.send(request.user)
 }

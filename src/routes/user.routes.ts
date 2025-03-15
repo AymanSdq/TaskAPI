@@ -1,6 +1,7 @@
 // Importing 
 import express from "express";
-import { loginUser, registerUser } from "../controllers/user.controller";
+import { editUser, loginUser, registerUser } from "../controllers/user.controller";
+import { authJWT } from "../auth/auth.middleware";
 
 
 const userRouter = express.Router();
@@ -9,5 +10,6 @@ const userRouter = express.Router();
 // User routes
 userRouter.post("/register", registerUser);
 userRouter.post("/login", loginUser);
+userRouter.get("/edit", authJWT, editUser)
 
 export default userRouter
