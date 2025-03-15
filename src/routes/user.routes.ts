@@ -10,6 +10,6 @@ const userRouter = express.Router();
 // User routes
 userRouter.post("/register", registerUser);
 userRouter.post("/login", loginUser);
-userRouter.get("/edit", authJWT, editUser)
+userRouter.patch("/edit", authJWT, editUser)
 
 export default userRouter

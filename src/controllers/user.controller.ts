@@ -5,7 +5,7 @@ import { AuthRequest } from "../auth/auth.middleware";
 
 
 interface userRegister {
-    fullName : string,
+    fullname : string,
     email : string,
     password : string
 }
@@ -58,7 +58,29 @@ export const loginUser = async ( request : Request, response : Response ) => {
 
 // edit profile 
 export const editUser = async ( request : AuthRequest, response : Response ) => {
-    response.send(request.user)
-    // Fetch the userData first
     
+    try {
+        const dataFromToken = request.user
+        const newData = request.body
+        // Fetch the userData first
+        const userTokenData = await userServices.updateService(dataFromToken)
+        
+        if (!newData.fullname || newData.fullname.trim() === '') {
+            newData.fullname = userTokenData.fullname
+        }
+        if (!newData.email || newData.email.trim() === '') {
+            newData.email = userTokenData.email
+        }
+        if (!newData.avatarurl || newData.avatarurl.trim() === '') {
+            newData.avatarurl = userTokenData.avatarurl
+        }
+
+        response.json({data : userTokenData, newData : newData})
+
+
+    }catch(error : any) {
+        response.status(502).json({Errormessage : error.message});
+    }
+
+
 }

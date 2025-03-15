@@ -6,10 +6,16 @@ import jwt from "jsonwebtoken"
 dotenv.config()
 
 interface userData {
-    fullName : string,
+    fullname : string,
     email : string,
     password : string
 }
+
+interface userTokenInfo {
+    userid : string,
+    email : string
+}
+
 
 interface userLogin {
     email : string,
@@ -18,13 +24,13 @@ interface userLogin {
 
 export const createUserServices = async (userData : userData) => {
 
-    const { fullName , email , password } = userData
+    const { fullname , email , password } = userData
     const avatarImage = "https://avatar.iran.liara.run/public/26"
 
     const createUserQuery = await query(`
         INSERT INTO users (fullName, email, password, avatarurl)
         VALUES ($1, $2, $3, $4) RETURNING *
-        `, [fullName, email ,password, avatarImage]);
+        `, [fullname, email ,password, avatarImage]);
     
     return createUserQuery.rows[0]
 }
@@ -73,4 +79,16 @@ export const loginService = async ( userLogin : userLogin) => {
 
     return { Success : true, Message : token}
     
+}
+
+
+export const updateService = async ( userTokenInfo : userTokenInfo ) => {
+
+    const {userid , email} = userTokenInfo;
+
+    const showmeData = await query(
+        `SELECT * FROM users
+        WHERE userid = $1 AND email = $2`, [userid , email])
+
+    return showmeData.rows[0]
 }
