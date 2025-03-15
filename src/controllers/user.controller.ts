@@ -58,6 +58,7 @@ export const loginUser = async ( request : Request, response : Response ) => {
 
 // edit profile 
 export const editUser = async ( request : AuthRequest, response : Response ) => {
-
     response.send(request.user)
+    // Fetch the userData first
+    
 }
