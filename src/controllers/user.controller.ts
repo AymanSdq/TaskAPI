@@ -84,3 +84,24 @@ export const editUser = async ( request : AuthRequest, response : Response ) => 
 
 
 }
+
+// Delete Account
+export const deleteUser = async ( request : AuthRequest , response : Response ) => {
+
+    try {
+        const userToken = await request.user ;
+
+        const {password} = request.body
+
+        if(!password) {
+            response.status(402).json({Errormessage : "Please enter your Password! "})
+            return
+        }
+        const deleteAccount = await userServices.deleteUserService(userToken, password)
+
+        response.status(202).json({Message : deleteAccount})
+
+    }catch(error : any) {
+        response.status(502).json({Error : error.message})
+    }
+}

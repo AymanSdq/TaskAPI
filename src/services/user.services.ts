@@ -1,6 +1,7 @@
 import { query } from "../Database/connect.db";
-import bcrypt from "bcrypt"
+import bcrypt, { compare } from "bcrypt"
 import dotenv from 'dotenv'
+import { response } from "express";
 import jwt from "jsonwebtoken"
 
 dotenv.config()
@@ -119,6 +120,39 @@ export const updateUserService = async ( userTokenInfo : userTokenInfo , newData
         
     } catch(error : any){
         console.error(error.message)
+    }
+
+}
+
+export const deleteUserService = async ( userTokenInfo : userTokenInfo , password : string) => {
+
+    try {
+        const {userid , email } = userTokenInfo ;
+
+        const getPassword = await query(
+            `SELECT password FROM users
+            WHERE email = $1 and userid = $2 `, [email, userid])
+
+        const userPassword = getPassword.rows[0].password;
+
+        const comparePassword = await bcrypt.compare(password , userPassword)
+
+        if(!comparePassword){
+            return { ErrorMessage : "Password incrorrect can't delete the account! "}
+        }
+
+        const deleteAccount = await query(
+            `DELETE FROM users
+            WHERE userid = $1, email = $2 `, [userid, email]);
+
+        if(!deleteAccount){
+            return {Error : "Please try again! "}
+        }
+
+        return {Success : "Account Deleted Succeffuly"}
+        
+    } catch (error : any) {
+        response.status(502).json({Errormessage : error.message })
     }
 
 }
