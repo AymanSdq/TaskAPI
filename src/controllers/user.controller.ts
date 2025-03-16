@@ -97,6 +97,7 @@ export const deleteUser = async ( request : AuthRequest , response : Response ) 
             response.status(402).json({Errormessage : "Please enter your Password! "})
             return
         }
+
         const deleteAccount = await userServices.deleteUserService(userToken, password)
 
         response.status(202).json({Message : deleteAccount})

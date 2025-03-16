@@ -128,7 +128,6 @@ export const deleteUserService = async ( userTokenInfo : userTokenInfo , passwor
 
     try {
         const {userid , email } = userTokenInfo ;
-
         const getPassword = await query(
             `SELECT password FROM users
             WHERE email = $1 and userid = $2 `, [email, userid])
@@ -136,20 +135,19 @@ export const deleteUserService = async ( userTokenInfo : userTokenInfo , passwor
         const userPassword = getPassword.rows[0].password;
 
         const comparePassword = await bcrypt.compare(password , userPassword)
-
+        
         if(!comparePassword){
             return { ErrorMessage : "Password incrorrect can't delete the account! "}
         }
 
         const deleteAccount = await query(
             `DELETE FROM users
-            WHERE userid = $1, email = $2 `, [userid, email]);
+            WHERE userid = $1 and email = $2 `, [userid, email]);
 
         if(!deleteAccount){
             return {Error : "Please try again! "}
         }
-
-        return {Success : "Account Deleted Succeffuly"}
+        return {Success : true, Message : "Account Deleted!"}
         
     } catch (error : any) {
         response.status(502).json({Errormessage : error.message })
