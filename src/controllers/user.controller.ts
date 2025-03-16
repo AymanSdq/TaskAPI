@@ -63,17 +63,17 @@ export const editUser = async ( request : AuthRequest, response : Response ) => 
         const dataFromToken = request.user
         const newData = request.body
         // Fetch the userData first
-        const userTokenData = await userServices.updateService(dataFromToken)
+        const userTokenData = await userServices.userDataService(dataFromToken)
         
         if (!newData.fullname || newData.fullname.trim() === '') {
             newData.fullname = userTokenData.fullname
         }
-        if (!newData.email || newData.email.trim() === '') {
-            newData.email = userTokenData.email
-        }
+        
         if (!newData.avatarurl || newData.avatarurl.trim() === '') {
             newData.avatarurl = userTokenData.avatarurl
         }
+
+        const updateData = await userServices.updateUserService(dataFromToken, newData)
 
         response.json({data : userTokenData, newData : newData})
 

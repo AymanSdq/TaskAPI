@@ -11,6 +11,12 @@ interface userData {
     password : string
 }
 
+interface newData {
+    fullname : string,
+    email : string,
+    avatarurl : string
+}
+
 interface userTokenInfo {
     userid : string,
     email : string
@@ -82,13 +88,37 @@ export const loginService = async ( userLogin : userLogin) => {
 }
 
 
-export const updateService = async ( userTokenInfo : userTokenInfo ) => {
+export const userDataService = async ( userTokenInfo : userTokenInfo ) => {
 
     const {userid , email} = userTokenInfo;
 
     const showmeData = await query(
-        `SELECT * FROM users
+        `SELECT fullname, avatarurl, updated_at FROM users
         WHERE userid = $1 AND email = $2`, [userid , email])
 
     return showmeData.rows[0]
+}
+
+
+export const updateUserService = async ( userTokenInfo : userTokenInfo , newData : newData) => {
+
+    try{
+        const {userid , email} = userTokenInfo;
+
+        const {fullname, avatarurl} = newData
+
+        const dateNow = new Date()
+
+        const updateData = await query(
+            `UPDATE users
+            SET fullname = $1, avatarurl = $2, updated_at = $3
+            WHERE userid = $4 AND email = $5`, [fullname, avatarurl , dateNow ,userid , email])
+
+        
+
+        
+    } catch(error : any){
+        console.error(error.message)
+    }
+
 }
