@@ -1,6 +1,6 @@
 import { Request , Response } from "express-serve-static-core";
 import * as userServices from "../services/user.services"
-import bcrypt from "bcrypt";
+import bcrypt, { hash } from "bcrypt";
 import { AuthRequest } from "../auth/auth.middleware";
 
 
@@ -106,3 +106,31 @@ export const deleteUser = async ( request : AuthRequest , response : Response ) 
         response.status(502).json({Error : error.message})
     }
 }
+
+// Change Password 
+export const updatePassword = async ( request : AuthRequest , response : Response ) => {
+    try {
+        const tokenUser = await request.user;
+        const passInfo = await request.body
+
+        if(!passInfo.oldpassword || passInfo.oldpassword.trim() === ''){
+            response.status(402).json({Errormessage : "Please enter old Password! "})
+            return;
+        }
+
+        if(!passInfo.newpassword || passInfo.newpassword.trim() === ''){
+            response.status(402).json({Errormessage : "Please enter the new Password! "})
+            return;
+        }
+
+        const hashedPassword = await bcrypt.hash(passInfo.newpassword, salt);
+        passInfo.newpassword = hashedPassword
+
+        const changePassword = await userServices.changePassword(tokenUser, passInfo)
+
+        response.status(202).send(changePassword)
+
+    } catch (error : any ) {
+        response.status(502).json({Errormessage : error.messaage})
+    }
+}   
