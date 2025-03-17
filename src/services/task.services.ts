@@ -48,4 +48,18 @@ export const addTaskService = async (authInfo : authInfo, taksData : taskData ) 
     }
 }
 
-// TODO : VIEW SINGLE TASK 
+// todo : VIEW SINGLE TASK 
+export const getOneTask = async (authInfo : authInfo, taskid : string) => {
+    try {
+        const {userid, email} = authInfo
+
+        const getOne = await query(`
+            SELECT * FROM tasks
+            WHERE userid = $1 AND taskid = $2`, [userid, taskid])
+        
+        return getOne.rows[0]
+        
+    } catch (error : any) {
+        return {Success : false , Error : error.message}
+    }
+}

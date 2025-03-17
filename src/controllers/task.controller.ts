@@ -1,4 +1,4 @@
-import { Request, Response } from "express"
+import { request, Request, Response } from "express"
 import { AuthRequest } from "../auth/auth.middleware"
 import * as tasksService from "../services/task.services"
 
@@ -37,6 +37,22 @@ export const createTasks = async (request : AuthRequest, response : Response) =>
 
         response.status(202).json({data : addTask})
     } catch (error : any ) {
+        response.status(502).json({Error : error.message})
+    }
+}
+
+// get Single task
+export const getaTask = async ( request : AuthRequest , response : Response ) => {
+
+    try {
+        const authInfo = await request.user
+        const {id} = await request.params
+
+        const getTheTask = await tasksService.getOneTask(authInfo, id)
+
+        response.status(202).json({data : getTheTask})
+
+    } catch (error : any) {
         response.status(502).json({Error : error.message})
     }
 }
