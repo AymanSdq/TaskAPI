@@ -158,7 +158,7 @@ export const deleteUserService = async ( userTokenInfo : userTokenInfo , passwor
 
 }
 
-export const changePassword = async (userTokenInfo : userTokenInfo, passwordinfo : passInfo ) => {
+export const changePassword = async (userTokenInfo : userTokenInfo, passwordinfo : passInfo  ) => {
 
     try {
         const {userid, email } = userTokenInfo

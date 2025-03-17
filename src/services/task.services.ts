@@ -48,7 +48,7 @@ export const addTaskService = async (authInfo : authInfo, taksData : taskData ) 
     }
 }
 
-// todo : VIEW SINGLE TASK 
+// Get one task
 export const getOneTask = async (authInfo : authInfo, taskid : string) => {
     try {
         const {userid, email} = authInfo
@@ -60,6 +60,27 @@ export const getOneTask = async (authInfo : authInfo, taskid : string) => {
         return getOne.rows[0]
         
     } catch (error : any) {
+        return {Success : false , Error : error.message}
+    }
+}
+
+// Update Task
+export const updateTask = async (authInfo : authInfo, taskid : string, newData : taskData) => {
+    
+    try {
+        const {userid , email } = authInfo;
+        const {title , description, status, due_date } = newData
+
+        const updateDate = new Date();
+
+        const updateTask = await query(
+            `UPDATE tasks
+            SET title = $1, description = $2, status = $3, due_date = $4 , updated_at = $5
+            WHERE userid = $6 AND taskid = $7 RETURNING *`, [title, description, status, due_date , updateDate  ,userid, taskid])
+
+        return updateTask.rows[0]
+
+    } catch (error : any ) {
         return {Success : false , Error : error.message}
     }
 }

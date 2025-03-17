@@ -56,3 +56,36 @@ export const getaTask = async ( request : AuthRequest , response : Response ) =>
         response.status(502).json({Error : error.message})
     }
 }
+
+// TODO : Edit single Task
+export const editTask = async (request : AuthRequest , response : Response) => {
+
+    try {
+        const authInfo = await request.user;
+        const { id } = await request.params;
+        const newData = await request.body;
+
+        const getTask = await tasksService.getOneTask(authInfo, id);
+
+        if(!newData.title || newData.title.trim() === ''){
+            newData.title = getTask.title
+        }
+        if(!newData.description || newData.description.trim() === ''){
+            newData.description = getTask.description
+        }
+        if(!newData.status || newData.status.trim() === ''){
+            newData.status = getTask.status
+        }
+        if(!newData.due_date || newData.due_date.trim() === ''){
+            newData.due_date = getTask.due_date
+        }
+
+        const updateTask = await tasksService.updateTask(authInfo, id , newData)
+
+        response.status(202).send({newData : updateTask})
+
+    } catch (error : any) {
+        
+    }
+}
+
