@@ -56,9 +56,12 @@ export const getOneTask = async (authInfo : authInfo, taskid : string) => {
         const getOne = await query(`
             SELECT * FROM tasks
             WHERE userid = $1 AND taskid = $2`, [userid, taskid])
+
+        if(getOne.rows.length < 1){
+            return {Success : false , Message : "There is not task with this ID "}
+        }
         
         return getOne.rows[0]
-        
     } catch (error : any) {
         return {Success : false , Error : error.message}
     }

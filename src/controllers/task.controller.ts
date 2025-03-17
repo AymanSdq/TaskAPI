@@ -57,7 +57,7 @@ export const getaTask = async ( request : AuthRequest , response : Response ) =>
     }
 }
 
-// TODO : Edit single Task
+// Edit single Task
 export const editTask = async (request : AuthRequest , response : Response) => {
 
     try {
