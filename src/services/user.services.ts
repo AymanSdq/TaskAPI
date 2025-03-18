@@ -33,17 +33,30 @@ interface userLogin {
     password : string
 }
 
+const salt = 10;
+
 export const createUserServices = async (userData : userData) => {
+    try{
+        const { fullname , email , password } = userData
+        const avatarImage = "https://avatar.iran.liara.run/public/26"
 
-    const { fullname , email , password } = userData
-    const avatarImage = "https://avatar.iran.liara.run/public/26"
+        const hashedPassword = await bcrypt.hash(password, salt);
 
-    const createUserQuery = await query(`
-        INSERT INTO users (fullName, email, password, avatarurl)
-        VALUES ($1, $2, $3, $4) RETURNING *
-        `, [fullname, email ,password, avatarImage]);
+        const createUserQuery = await query(`
+            INSERT INTO users (fullName, email, password, avatarurl)
+            VALUES ($1, $2, $3, $4) RETURNING *
+            `, [fullname.trim(), email.toLowerCase() ,hashedPassword, avatarImage]);
     
-    return createUserQuery.rows[0]
+        return {Success : true, Message : "Account created successffully now logg in please"}
+
+    }catch(error : any){
+        console.error("Error in createUserServices:", error.message);
+
+        if(error.code === "23505"){
+            return { success: false, message: "Email already exists." };
+        }
+        return { success: false, message: "Failed to create user.", error: error.message };
+    }
 }
 
 export const loginService = async ( userLogin : userLogin) => {
@@ -130,6 +143,7 @@ export const deleteUserService = async ( userTokenInfo : userTokenInfo , passwor
 
     try {
         const {userid , email } = userTokenInfo ;
+
         const getPassword = await query(
             `SELECT password FROM users
             WHERE email = $1 and userid = $2 `, [email, userid])
@@ -139,7 +153,7 @@ export const deleteUserService = async ( userTokenInfo : userTokenInfo , passwor
         const comparePassword = await bcrypt.compare(password , userPassword)
         
         if(!comparePassword){
-            return { ErrorMessage : "Password incrorrect can't delete the account! "}
+            return {Success : true , Message : "Incorrect Password Please try again"}
         }
 
         const deleteAccount = await query(
@@ -147,9 +161,10 @@ export const deleteUserService = async ( userTokenInfo : userTokenInfo , passwor
             WHERE userid = $1 and email = $2 `, [userid, email]);
 
         if(!deleteAccount){
-            return {Error : "Please try again! "}
+            return {Success : false, Message : "Error while deleting the account please try again later"}
         }
-        return {Success : true, Message : "Account Deleted!"}
+
+        return {Success : true, Message : "Your Account has been delete Successfully"}
         
     } catch (error : any) {
         response.status(502).json({Errormessage : error.message })

@@ -26,11 +26,8 @@ export const registerUser = async ( request : Request, response : Response )  =>
 
     try {
         const {fullname , email, password} = await request.body
-        
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        const newUser = await userServices.createUserServices({ fullname, email, password : hashedPassword });
-        response.status(201).json({ message: "User registered successfully!", user: newUser });
+        const newUser = await userServices.createUserServices({ fullname, email, password});
+        response.status(201).json(newUser);
     } catch (error : any) {
         response.status(500).json({ error: "Internal Server Error", details: error.message });
     }
@@ -96,22 +93,22 @@ export const editUser = async ( request : AuthRequest, response : Response ) => 
 // Delete Account
 export const deleteUser = async ( request : AuthRequest , response : Response ) => {
 
-    try {
+    const errors = validationResult(request)
+    if(!errors.isEmpty()){
+        response.status(400).json({Errors : errors.array().map( err => err.msg )})
+        return
+    }
+
+    try { 
         const userToken = await request.user ;
-
-        const {password} = request.body
-
-        if(!password) {
-            response.status(402).json({Errormessage : "Please enter your Password! "})
-            return
-        }
+        const { password } = await request.body ;
 
         const deleteAccount = await userServices.deleteUserService(userToken, password)
 
-        response.status(202).json({Message : deleteAccount})
+        response.status(200).json(deleteAccount)        
 
     }catch(error : any) {
-        response.status(502).json({Error : error.message})
+        response.status(500).json({ error: "Internal Server Error", details: error.message });
     }
 }
 
