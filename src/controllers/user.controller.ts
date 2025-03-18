@@ -80,7 +80,7 @@ export const editUser = async ( request : AuthRequest, response : Response ) => 
 
         const updateData = await userServices.updateUserService(dataFromToken, { fullname, avatarurl })
 
-        response.status(200).json({Success : true, Message : "Data updated with success"})
+        response.status(200).json(updateData)
 
 
     }catch(error : any) {
@@ -114,24 +114,18 @@ export const deleteUser = async ( request : AuthRequest , response : Response ) 
 
 // Change Password 
 export const updatePassword = async ( request : AuthRequest , response : Response ) => {
+
+    const errors = validationResult(request)
+    if(!errors.isEmpty()){
+        response.status(404).json({Errors : errors.array().map(err => err.msg)})
+        return
+    }
+
     try {
         const tokenUser = await request.user;
-        const passInfo = await request.body
+        const {oldpassword , newpassword} = await request.body
 
-        if(!passInfo.oldpassword || passInfo.oldpassword.trim() === ''){
-            response.status(402).json({Errormessage : "Please enter old Password! "})
-            return;
-        }
-
-        if(!passInfo.newpassword || passInfo.newpassword.trim() === ''){
-            response.status(402).json({Errormessage : "Please enter the new Password! "})
-            return;
-        }
-
-        const hashedPassword = await bcrypt.hash(passInfo.newpassword, salt);
-        passInfo.newpassword = hashedPassword
-
-        const changePassword = await userServices.changePassword(tokenUser, passInfo)
+        const changePassword = await userServices.changePassword(tokenUser, {oldpassword , newpassword})
 
         response.status(202).send(changePassword)
 

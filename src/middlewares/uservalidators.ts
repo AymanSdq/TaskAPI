@@ -19,7 +19,7 @@ export const registerValidation = [
         .matches(/[a-z]/).withMessage("Must contain at least one lowercase letter")
         .matches(/[0-9]/).withMessage("Must contain at least one number")
         .matches(/[@$!%*?-_&]/).withMessage("Must contain at least one special character (@$!%*?&)")
-        
+        .isStrongPassword().withMessage("Your password is not strong enought")
 ]
 
 
@@ -41,3 +41,21 @@ export const deleteUserValidation = [
         .notEmpty().withMessage("Password field is required")
 ]
 
+
+
+export const passwordChangeValidation = [
+    body("oldpassword")
+        .trim()
+        .notEmpty().withMessage("Password field is required"),
+
+    body("newpassword")
+        .trim()
+        .notEmpty().withMessage("Password field is required")
+        .isLength({min : 8}).withMessage("Password must be at least 8 characters")
+        .matches(/[A-Z]/).withMessage("Must contain at least one uppercase letter")
+        .matches(/[a-z]/).withMessage("Must contain at least one lowercase letter")
+        .matches(/[0-9]/).withMessage("Must contain at least one number")
+        .matches(/[@$!%*?-_&]/).withMessage("Must contain at least one special character (@$!%*?&)")
+        .isStrongPassword().withMessage("Your password is not strong enought")
+    
+]

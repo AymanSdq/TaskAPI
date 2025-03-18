@@ -61,61 +61,69 @@ export const createUserServices = async (userData : userData) => {
 
 export const loginService = async ( userLogin : userLogin) => {
 
+    try {
+        const { email, password } = userLogin
 
-    const { email, password } = userLogin
-
-    // Checking the email 
-    const checkEmail = await query(
-        `SELECT email from users
-        WHERE email = $1 `, [email]
-    )
-    if( checkEmail.rows.length < 1 ){
-        return {Success : false, Message : "Incorrect Email or Password"}
+        // Checking the email 
+        const checkEmail = await query(
+            `SELECT email from users
+            WHERE email = $1 `, [email.toLowerCase()]
+        )
+        if( checkEmail.rows.length < 1 ){
+            return {Success : false, Message : "Incorrect Email or Password"}
+        }
+    
+        // Checking and comparing the password 
+        const checkPassword = await query(
+            `SELECT password FROM users
+            WHERE email = $1`, [email.toLowerCase()]
+        )
+        // Comparing Password
+        const dbPassword = checkPassword.rows[0].password
+        const comparingPassword =  await bcrypt.compare(password, dbPassword)
+        // Incorrect Password
+        if(!comparingPassword){
+            return {Sucess : false , Message : "Incorrect Email or Password"}
+        }
+    
+        // Getting user data to make a token
+        const getAllUserData = await query(
+            `SELECT userid, email, fullname FROM users
+            WHERE email = $1 AND password = $2`, [email.toLowerCase(), dbPassword]
+        )
+        
+        const dataForToken = getAllUserData.rows[0]
+    
+        // Token login Created      
+        const token = jwt.sign(
+            { userid : dataForToken.userid, email : dataForToken.email, fullname : dataForToken.fullName},
+            process.env.JWT_SECRET as string,
+            {expiresIn : process.env.JWT_EXPIRES_IN || "48h"} as jwt.SignOptions
+        );
+    
+        return { Success : true, Message : "Logged in Succeffully", Token : token}
+        
+    } catch (error : any) {
+        console.error(error.message)
+        return {Type : "Error" , Message : error.message}
     }
 
-
-    // Checking and comparing the password 
-    const checkPassword = await query(
-        `SELECT password FROM users
-        WHERE email = $1`, [email]
-    )
-    // Comparing Password
-    const dbPassword = checkPassword.rows[0].password
-    const comparingPassword =  await bcrypt.compare(password, dbPassword)
-    // Incorrect Password
-    if(!comparingPassword){
-        return {Sucess : false , Message : "Incorrect Email or Password"}
-    }
-
-    // Getting user data to make a token
-    const getAllUserData = await query(
-        `SELECT userid, email, fullname FROM users
-        WHERE email = $1 AND password = $2`, [email, dbPassword]
-    )
-    
-    const dataForToken = getAllUserData.rows[0]
-
-    // Token login Created      
-    const token = jwt.sign(
-        { userid : dataForToken.userid, email : dataForToken.email, fullname : dataForToken.fullName},
-        process.env.JWT_SECRET as string,
-        {expiresIn : process.env.JWT_EXPIRES_IN || "48h"} as jwt.SignOptions
-    );
-
-
-    return { Success : true, Message : "Logged in Succeffully", Token : token}
-    
 }
 
 export const userDataService = async ( userTokenInfo : userTokenInfo ) => {
 
-    const {userid , email} = userTokenInfo;
+    try {
+        const {userid , email} = userTokenInfo;
 
-    const showmeData = await query(
+        const showmeData = await query(
         `SELECT fullname, avatarurl, updated_at FROM users
         WHERE userid = $1 AND email = $2`, [userid , email])
 
-    return showmeData.rows[0]
+        return showmeData.rows[0]
+    } catch (error : any) {
+        console.error(error.message)
+        return {Type : "Error" , Message : error.message}
+    }
 }
 
 export const updateUserService = async ( userTokenInfo : userTokenInfo , newData : newData) => {
@@ -132,9 +140,10 @@ export const updateUserService = async ( userTokenInfo : userTokenInfo , newData
             SET fullname = $1, avatarurl = $2, updated_at = $3
             WHERE userid = $4 AND email = $5`, [fullname, avatarurl , dateNow ,userid , email])
 
-        
+        return {Success : true, Message : "Data updated with success"}
     } catch(error : any){
         console.error(error.message)
+        return {Type : "Error" , Message : error.message}
     }
 
 }
@@ -167,12 +176,14 @@ export const deleteUserService = async ( userTokenInfo : userTokenInfo , passwor
         return {Success : true, Message : "Your Account has been delete Successfully"}
         
     } catch (error : any) {
-        response.status(502).json({Errormessage : error.message })
+        console.error(error.message)
+        return {Type : "Error" , Message : error.message}
     }
 
 }
 
 export const changePassword = async (userTokenInfo : userTokenInfo, passwordinfo : passInfo  ) => {
+    
 
     try {
         const {userid, email } = userTokenInfo
@@ -191,15 +202,18 @@ export const changePassword = async (userTokenInfo : userTokenInfo, passwordinfo
             return {Success : false, Errormessage : "Old Password is Incorrect "}
         }
 
+        const hashedPassword = await bcrypt.hash(newpassword, salt);
+
         const changePassword = query(
             `UPDATE users
             SET password = $1
-            WHERE userid = $2 AND email = $3`, [newpassword, userid, email]
+            WHERE userid = $2 AND email = $3`, [hashedPassword, userid, email]
         )
 
-        return {Sucess : true, Message : "Password has been Changed ! "}
+        return {Sucess : true, Message : "Your password has been changed successffully"}
         
     } catch (error : any) {
-        response.status(502).json({Errormessage : error.messaage})
+        console.error(error.message)
+        return {Type : "Error" , Message : error.message}
     }
 }
