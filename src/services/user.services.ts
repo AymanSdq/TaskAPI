@@ -19,7 +19,6 @@ interface passInfo {
 
 interface newData {
     fullname : string,
-    email : string,
     avatarurl : string
 }
 
@@ -119,8 +118,6 @@ export const updateUserService = async ( userTokenInfo : userTokenInfo , newData
             `UPDATE users
             SET fullname = $1, avatarurl = $2, updated_at = $3
             WHERE userid = $4 AND email = $5`, [fullname, avatarurl , dateNow ,userid , email])
-
-        
 
         
     } catch(error : any){

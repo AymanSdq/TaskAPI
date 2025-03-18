@@ -61,28 +61,33 @@ export const loginUser = async ( request : Request, response : Response ) => {
 
 // edit profile 
 export const editUser = async ( request : AuthRequest, response : Response ) => {
+
+    const errors = validationResult(request)
+    if(!errors.isEmpty()){
+        response.status(404).json({Errors : errors.array().map(err => err.msg)})
+        return
+    }
     
     try {
         const dataFromToken = request.user
-        const newData = request.body
+        let {fullname , avatarurl} = request.body
         // Fetch the userData first
         const userTokenData = await userServices.userDataService(dataFromToken)
         
-        if (!newData.fullname || newData.fullname.trim() === '') {
-            newData.fullname = userTokenData.fullname
+        if (!fullname || fullname.trim() === '') {
+            fullname = userTokenData.fullname
         }
-        
-        if (!newData.avatarurl || newData.avatarurl.trim() === '') {
-            newData.avatarurl = userTokenData.avatarurl
+        if (!avatarurl || avatarurl.trim() === '') {
+            avatarurl = userTokenData.avatarurl
         }
 
-        const updateData = await userServices.updateUserService(dataFromToken, newData)
+        const updateData = await userServices.updateUserService(dataFromToken, { fullname, avatarurl })
 
-        response.json({data : userTokenData, newData : newData})
+        response.status(200).json({Success : true, Message : "Data updated with success"})
 
 
     }catch(error : any) {
-        response.status(502).json({Errormessage : error.message});
+        response.status(500).json({ error: "Internal Server Error", details: error.message });
     }
 
 

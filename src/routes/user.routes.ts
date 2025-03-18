@@ -11,7 +11,7 @@ const userRouter = express.Router();
 // User routes
 userRouter.post("/register",  registerValidation ,registerUser);
 userRouter.post("/login", loginValidation ,loginUser);
-userRouter.patch("/edit", authJWT, editUser);
+userRouter.patch("/edit", authJWT , editUser);
 userRouter.delete("/delete" , authJWT, deleteUser)
 userRouter.patch("/changepassword", authJWT, updatePassword )
 
