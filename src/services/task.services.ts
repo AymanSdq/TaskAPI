@@ -87,3 +87,25 @@ export const updateTask = async (authInfo : authInfo, taskid : string, newData :
         return {Success : false , Error : error.message}
     }
 }
+
+// Delete Task
+export const deleteTask = async (authInfo : authInfo, taskid : string) => {
+
+    try {
+        const {userid, email} = authInfo
+
+        const deleteTask = await query(
+            `DELETE FROM tasks
+            WHERE userid = $1 AND taskid = $2
+            RETURNING * `, [userid, taskid])
+
+        if (deleteTask.rowCount === 0) {
+            return { success: false, message: "Task not found or you don't have permission to delete it." };
+        }
+        
+        return deleteTask.rows
+
+    } catch (error : any) {
+        return { Success : false, Error : error.message}
+    }
+}

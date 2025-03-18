@@ -85,7 +85,21 @@ export const editTask = async (request : AuthRequest , response : Response) => {
         response.status(202).send({newData : updateTask})
 
     } catch (error : any) {
-        
+        response.status(502).json({Error : error.message})
+
     }
 }
 
+// Delete Single Task
+export const deleteTask = async (request : AuthRequest , response : Response) => {
+    try {
+        const authInfo = await request.user
+        const { id } = await request.params
+
+        const deleteTask = await tasksService.deleteTask(authInfo, id)
+
+        response.status(202).json({Message : deleteTask})
+    } catch (error : any) {
+        response.status(502).json({Error : error.message})
+    }
+}

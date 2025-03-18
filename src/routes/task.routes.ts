@@ -1,6 +1,6 @@
 import express from "express";
 import { authJWT } from "../auth/auth.middleware";
-import { createTasks, editTask, getAllTasks, getaTask } from "../controllers/task.controller";
+import { createTasks, deleteTask, editTask, getAllTasks, getaTask } from "../controllers/task.controller";
 
 const taskRouter = express.Router()
 
@@ -12,5 +12,7 @@ taskRouter.post("/addtask", authJWT, createTasks)
 taskRouter.get("/mytask/:id", authJWT, getaTask)
 // Edit task
 taskRouter.patch("/edittask/:id", authJWT, editTask)
+// Delete Task
+taskRouter.delete("/deletetask/:id", authJWT, deleteTask)
 
 export default taskRouter

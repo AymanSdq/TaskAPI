@@ -19,6 +19,24 @@ export const registerUser = async ( request : Request, response : Response ) => 
     try {
         const userData = await request.body
 
+        // Checking for important field
+        if( !userData.fullname){
+            response.status(402).json({Error : "Fullname field is required!"})
+            return;
+        }else if( !userData.email ){
+            response.status(402).json({Error : "Email field is required!"})
+            return;
+        }else if( !userData.password ){
+            response.status(402).json({Error : "Password field is required!"})
+            return;
+        }
+
+
+        if(userData.fullname.trim() === ''){
+            response.status(402).json({Error : "Please enter your Fullname "})
+            return;
+        }
+
         if(!userData.password){
             response.status(402).json({Error : "No Password Entered! "})
             return;
