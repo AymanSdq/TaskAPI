@@ -8,7 +8,10 @@ const connectionString = process.env.DATABASE_URL
 
 
 const databaseConnection = new Pool({
-    connectionString: connectionString
+    connectionString: connectionString,
+    ssl: {
+        rejectUnauthorized: false, // Required for Neon PostgreSQL
+    },
 });
 
 

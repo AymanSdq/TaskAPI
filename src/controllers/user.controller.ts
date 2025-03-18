@@ -2,6 +2,7 @@ import { Request , Response } from "express-serve-static-core";
 import * as userServices from "../services/user.services"
 import bcrypt, { hash } from "bcrypt";
 import { AuthRequest } from "../auth/auth.middleware";
+import { validationResult } from "express-validator";
 
 
 interface userRegister {
@@ -15,62 +16,46 @@ interface userRegister {
 const salt = 10
 
 // Register Controller 
-export const registerUser = async ( request : Request, response : Response ) => {
+export const registerUser = async ( request : Request, response : Response )  => {
+
+    const errors = validationResult(request)
+    if(!errors.isEmpty()){
+        response.status(400).json({Errors : errors.array().map(err => err.msg)})
+        return
+    }
+
     try {
-        const userData = await request.body
+        const {fullname , email, password} = await request.body
+        
+        const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Checking for important field
-        if( !userData.fullname){
-            response.status(402).json({Error : "Fullname field is required!"})
-            return;
-        }else if( !userData.email ){
-            response.status(402).json({Error : "Email field is required!"})
-            return;
-        }else if( !userData.password ){
-            response.status(402).json({Error : "Password field is required!"})
-            return;
-        }
-
-
-        if(userData.fullname.trim() === ''){
-            response.status(402).json({Error : "Please enter your Fullname "})
-            return;
-        }
-
-        if(!userData.password){
-            response.status(402).json({Error : "No Password Entered! "})
-            return;
-        }
-
-        const hashedPassword = await bcrypt.hash(userData.password, salt);
-        userData.password = hashedPassword;
-        const newUser = await userServices.createUserServices(userData)
-
-        response.status(202).json({data : userData})
+        const newUser = await userServices.createUserServices({ fullname, email, password : hashedPassword });
+        response.status(201).json({ message: "User registered successfully!", user: newUser });
     } catch (error : any) {
-        response.status(502).json({ ErrorMessage : error.message})
+        response.status(500).json({ error: "Internal Server Error", details: error.message });
     }
 
 }
 
 // Login Controller
 export const loginUser = async ( request : Request, response : Response ) => {
+    
+    const errors = validationResult(request)
+    if(!errors.isEmpty()){
+        response.status(400).json({Errors : errors.array().map(error => error.msg)})
+        return
+    }
+    
     try {
-        const userData = request.body
-
-        // If the Password is entered 
-        if(!userData.password){
-            response.status(402).json({ErrorMessage : "Password not entred!"})
-            return;
-        }
+        const {email , password} = request.body
 
         // Services to check the email if existe 
-        const checkEmail = await userServices.loginService(userData)
-
-        response.status(202).json({data : checkEmail})
+        const userLogin = await userServices.loginService({email, password})
+        
+        response.status(201).json(userLogin)
 
     } catch (error : any) {
-        response.status(502).json({Errormessage : error.message});
+        response.status(500).json({ error: "Internal Server Error", details: error.message });
     }
 }
 

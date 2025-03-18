@@ -51,45 +51,47 @@ export const loginService = async ( userLogin : userLogin) => {
 
 
     const { email, password } = userLogin
+
     // Checking the email 
     const checkEmail = await query(
         `SELECT email from users
         WHERE email = $1 `, [email]
     )
-
-    if(checkEmail.rows.length == 0){
-        return { ErrorMessage : "Email or Password are Incorrect "}
+    if( checkEmail.rows.length < 1 ){
+        return {Success : false, Message : "Incorrect Email or Password"}
     }
+
 
     // Checking and comparing the password 
     const checkPassword = await query(
         `SELECT password FROM users
         WHERE email = $1`, [email]
     )
-
+    // Comparing Password
     const dbPassword = checkPassword.rows[0].password
     const comparingPassword =  await bcrypt.compare(password, dbPassword)
-
+    // Incorrect Password
     if(!comparingPassword){
-        return { ErrorMessage : "Email or Password are Incorrect "}
+        return {Sucess : false , Message : "Incorrect Email or Password"}
     }
 
+    // Getting user data to make a token
     const getAllUserData = await query(
-        `SELECT userid, email, fullName FROM users
+        `SELECT userid, email, fullname FROM users
         WHERE email = $1 AND password = $2`, [email, dbPassword]
     )
-
+    
     const dataForToken = getAllUserData.rows[0]
 
     // Token login Created      
     const token = jwt.sign(
-        { userid : dataForToken.userid, email : dataForToken.email},
+        { userid : dataForToken.userid, email : dataForToken.email, fullname : dataForToken.fullName},
         process.env.JWT_SECRET as string,
         {expiresIn : process.env.JWT_EXPIRES_IN || "48h"} as jwt.SignOptions
     );
 
 
-    return { Success : true, Message : token}
+    return { Success : true, Message : "Logged in Succeffully", Token : token}
     
 }
 
