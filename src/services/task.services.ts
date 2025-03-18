@@ -22,10 +22,11 @@ export const getTasksService = async (authInfo : authInfo) => {
             `SELECT * FROM tasks
             WHERE userid = $1`, [userid])
 
-        return getAllTasks.rows
+        return {Success : true , data : getAllTasks.rows}
         
     } catch (error : any ) {
-        return { Success : false, Error : error.message}
+        console.error(error.message)
+        return {Type : "Error" , Message : error.message}
     }
 
 }   
@@ -35,16 +36,25 @@ export const addTaskService = async (authInfo : authInfo, taksData : taskData ) 
 
     try {
         const {userid , email } = authInfo
-        const { title , description, status, due_date} = taksData
+        let { title , description, status, due_date} = taksData
 
+        if(!status || status.trim() === '' ) {
+            status = "pending"
+        }
         const createTasks = await query(`
             INSERT INTO tasks (userid, title, description, status, due_date)
             VALUES ($1, $2, $3, $4, $5) RETURNING *`, [userid, title , description, status, due_date])
+
+        if(createTasks.rows.length < 0 ){
+            return {Success : false, Error : "Error while adding the task"};
+            return
+        }
             
-        return createTasks.rows[0];
+        return {Success : true, data : createTasks.rows[0]};
         
     } catch (error : any) {
-        return {Success : false , Error : error.message}
+        console.error(error.message)
+        return {Type : "Error" , Message : error.message}
     }
 }
 
@@ -61,30 +71,50 @@ export const getOneTask = async (authInfo : authInfo, taskid : string) => {
             return {Success : false , Message : "There is not task with this ID "}
         }
         
-        return getOne.rows[0]
+        return {Success : true , data : getOne.rows[0]}
+
     } catch (error : any) {
         return {Success : false , Error : error.message}
     }
 }
 
 // Update Task
-export const updateTask = async (authInfo : authInfo, taskid : string, newData : taskData) => {
+export const updateTask = async (authInfo : authInfo, taskid : string, newData : taskData, oldData : taskData) => {
     
     try {
-        const {userid , email } = authInfo;
-        const {title , description, status, due_date } = newData
+        const {userid , email } = await authInfo;
+        let {title , description, status, due_date } = await newData
 
         const updateDate = new Date();
+
+        if(!newData.title || newData.title.trim() === ''){
+            title = oldData.title
+        }
+        if(!newData.description || newData.description.trim() === ''){
+            description = oldData.description
+        }
+        if(!newData.status || newData.status.trim() === ''){
+            status = oldData.status
+        }
+        if(!newData.due_date){
+            due_date = oldData.due_date
+        }
 
         const updateTask = await query(
             `UPDATE tasks
             SET title = $1, description = $2, status = $3, due_date = $4 , updated_at = $5
             WHERE userid = $6 AND taskid = $7 RETURNING *`, [title, description, status, due_date , updateDate  ,userid, taskid])
 
-        return updateTask.rows[0]
+        if(updateTask.rows.length < 1){
+            return {Success : false, Error : "Error while Editing the task"};
+            return
+        }
+
+        return {Success : true, data : updateTask.rows[0]}
 
     } catch (error : any ) {
-        return {Success : false , Error : error.message}
+        console.error(error.message)
+        return {Type : "Error" , Message : error.message}
     }
 }
 
@@ -103,9 +133,10 @@ export const deleteTask = async (authInfo : authInfo, taskid : string) => {
             return { success: false, message: "Task not found or you don't have permission to delete it." };
         }
         
-        return deleteTask.rows
+        return {Success : true, Message : "Task Deleted Successffully "}
 
     } catch (error : any) {
-        return { Success : false, Error : error.message}
+        console.error(error.message)
+        return {Type : "Error" , Message : error.message}
     }
 }

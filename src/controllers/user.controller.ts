@@ -127,7 +127,7 @@ export const updatePassword = async ( request : AuthRequest , response : Respons
 
         const changePassword = await userServices.changePassword(tokenUser, {oldpassword , newpassword})
 
-        response.status(202).send(changePassword)
+        response.status(200).send(changePassword)
 
     } catch (error : any ) {
         response.status(502).json({Errormessage : error.messaage})
