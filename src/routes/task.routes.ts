@@ -14,6 +14,6 @@ taskRouter.get("/mytask/:id", authJWT, idValidator,  getaTask)
 // Edit task
 taskRouter.patch("/edittask/:id", authJWT,editTaskValidator , editTask)
 // Delete Task
-taskRouter.delete("/deletetask/:id", authJWT, deleteTask)
+taskRouter.delete("/deletetask/:id", authJWT, idValidator, deleteTask)
 
 export default taskRouter

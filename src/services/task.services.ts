@@ -10,6 +10,7 @@ interface taskData {
     title : string,
     description? : string,
     status? : "pending" | "in_progress" | "completed",
+    priority? : "low" | "medium" | "high",
     due_date?: string;
 }
 
@@ -36,14 +37,19 @@ export const addTaskService = async (authInfo : authInfo, taksData : taskData ) 
 
     try {
         const {userid , email } = authInfo
-        let { title , description, status, due_date} = taksData
+        let { title , description, status, priority , due_date} = taksData
 
         if(!status || status.trim() === '' ) {
             status = "pending"
         }
+
+        if(!priority || priority.trim() === '' ) {
+            priority = "medium"
+        }
+
         const createTasks = await query(`
-            INSERT INTO tasks (userid, title, description, status, due_date)
-            VALUES ($1, $2, $3, $4, $5) RETURNING *`, [userid, title , description, status, due_date])
+            INSERT INTO tasks (userid, title, description, status, priority , due_date)
+            VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`, [userid, title , description, status, priority ,due_date])
 
         if(createTasks.rows.length < 0 ){
             return {Success : false, Error : "Error while adding the task"};
@@ -83,7 +89,7 @@ export const updateTask = async (authInfo : authInfo, taskid : string, newData :
     
     try {
         const {userid , email } = await authInfo;
-        let {title , description, status, due_date } = await newData
+        let {title , description, status, priority , due_date } = await newData
 
         const updateDate = new Date();
 
@@ -96,14 +102,17 @@ export const updateTask = async (authInfo : authInfo, taskid : string, newData :
         if(!newData.status || newData.status.trim() === ''){
             status = oldData.status
         }
+        if(!newData.priority || newData.priority.trim() === ''){
+            priority = oldData.priority
+        }
         if(!newData.due_date){
             due_date = oldData.due_date
         }
 
         const updateTask = await query(
             `UPDATE tasks
-            SET title = $1, description = $2, status = $3, due_date = $4 , updated_at = $5
-            WHERE userid = $6 AND taskid = $7 RETURNING *`, [title, description, status, due_date , updateDate  ,userid, taskid])
+            SET title = $1, description = $2, status = $3, priority = $4 ,due_date = $5 , updated_at = $6
+            WHERE userid = $7 AND taskid = $8 RETURNING *`, [title, description, status, priority ,due_date , updateDate  ,userid, taskid])
 
         if(updateTask.rows.length < 1){
             return {Success : false, Error : "Error while Editing the task"};

@@ -11,6 +11,11 @@ export const titleValidator = [
         .trim()
         .isIn(['pending', 'in_progress', 'completed']).withMessage("Status must be either 'pending', 'in_progress', 'completed'."),
 
+    body("priority")
+        .optional()
+        .trim()
+        .isIn(['low', 'medium', 'high']).withMessage("Priority must be either 'low', 'medium', 'high'."),
+
     body("description")
         .optional()
         .trim(),
@@ -41,9 +46,11 @@ export const editTaskValidator = [
         .trim()
         .isIn(['pending', 'in_progress', 'completed']).withMessage("Status must be either 'pending', 'in_progress', 'completed'."),
 
-    body("status")
+    body("priority")
         .optional()
-        .trim(),
+        .trim()
+        .isIn(['low', 'medium', 'high']).withMessage("Priority must be either 'low', 'medium', 'high'."),
+
     
     body("due_date")
         .optional()

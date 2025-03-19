@@ -88,6 +88,13 @@ export const editTask = async (request : AuthRequest , response : Response) => {
 
 // Delete Single Task
 export const deleteTask = async (request : AuthRequest , response : Response) => {
+    
+    const errors = validationResult(request)
+    if(!errors.isEmpty()){
+        response.status(400).json({Errors : errors.array().map( err => err.msg)})
+        return
+    }
+
     try {
         const authInfo = await request.user
         const { id } = await request.params
