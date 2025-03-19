@@ -119,7 +119,8 @@ export const userDataService = async ( userTokenInfo : userTokenInfo ) => {
         `SELECT fullname, avatarurl, updated_at FROM users
         WHERE userid = $1 AND email = $2`, [userid , email])
 
-        return showmeData.rows[0]
+
+        return {Success : true, data : showmeData.rows[0], info : showmeData.rowCount}
     } catch (error : any) {
         console.error(error.message)
         return {Type : "Error" , Message : error.message}

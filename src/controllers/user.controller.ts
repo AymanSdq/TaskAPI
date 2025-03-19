@@ -70,12 +70,17 @@ export const editUser = async ( request : AuthRequest, response : Response ) => 
         let {fullname , avatarurl} = request.body
         // Fetch the userData first
         const userTokenData = await userServices.userDataService(dataFromToken)
+
+        if(!userTokenData.info){
+            response.status(404).json({Success : false , Message : "Token Invalid or Not found"})
+            return 
+        }
         
         if (!fullname || fullname.trim() === '') {
-            fullname = userTokenData.fullname
+            fullname = userTokenData.data.fullname
         }
         if (!avatarurl || avatarurl.trim() === '') {
-            avatarurl = userTokenData.avatarurl
+            avatarurl = userTokenData.data.avatarurl
         }
 
         const updateData = await userServices.updateUserService(dataFromToken, { fullname, avatarurl })
