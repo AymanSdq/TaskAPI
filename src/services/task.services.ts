@@ -74,7 +74,7 @@ export const getOneTask = async (authInfo : authInfo, taskid : string) => {
             WHERE userid = $1 AND taskid = $2`, [userid, taskid])
 
         if(getOne.rows.length < 1){
-            return {Success : false , Message : "There is not task with this ID "}
+            return {Success : false , Message : "There is not task with this ID ", error : 404}
         }
         
         return {Success : true , data : getOne.rows[0]}

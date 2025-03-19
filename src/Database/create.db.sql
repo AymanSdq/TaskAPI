@@ -8,27 +8,27 @@ CREATE TABLE users (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Creating ENUM for the status of the task
+
 CREATE TYPE task_status AS ENUM ('pending', 'in_progress', 'completed');
 CREATE TYPE task_priority AS ENUM ('low', 'medium', 'high');
 
 CREATE TABLE tasks (
-    taksid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    taskid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     userid UUID NOT NULL,
     categoryid UUID,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     status task_status DEFAULT 'pending',
-    priority task_priority DEFAULT 'medium'
+    priority task_priority DEFAULT 'medium',
     due_date TIMESTAMP,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW(),
 
-    FOREIGN KEY (userid) REFERENCES users(userid) ON DELETE CASCADE
+    FOREIGN KEY (userid) REFERENCES users(userid) ON DELETE CASCADE,
     FOREIGN KEY (categoryid) REFERENCES categories(categoryid) ON DELETE CASCADE
 );
 
--- Create Categories dbs
+
 CREATE TABLE categories (
     categoryid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     userid UUID NOT NULL,

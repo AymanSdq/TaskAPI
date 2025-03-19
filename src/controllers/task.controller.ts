@@ -74,6 +74,11 @@ export const editTask = async (request : AuthRequest , response : Response) => {
         const newData = await request.body;
 
         const getTask = await tasksService.getOneTask(authInfo, id);
+        if(getTask.error == 404){
+            response.status(404).json({Success : false , Message : "There is not task with this ID "})
+            return
+        }
+
         const oldData = getTask.data
         
         const updateTask = await tasksService.updateTask(authInfo, id , newData , oldData)
