@@ -146,7 +146,7 @@ export const deleteTask = async (authInfo : authInfo, taskid : string) => {
             WHERE userid = $1 AND taskid = $2
             RETURNING * `, [userid, taskid])
 
-        if (deleteTask.rowCount === 0) {
+        if (deleteTask.rows.length < 1) {
             return { success: false, message: "Task not found or you don't have permission to delete it." };
         }
         

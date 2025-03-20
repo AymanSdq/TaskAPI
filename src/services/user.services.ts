@@ -170,7 +170,7 @@ export const deleteUserService = async ( userTokenInfo : userTokenInfo , passwor
             `DELETE FROM users
             WHERE userid = $1 and email = $2 `, [userid, email]);
 
-        if(!deleteAccount){
+        if(deleteAccount.rows.length < 1){
             return {Success : false, Message : "Error while deleting the account please try again later"}
         }
 
