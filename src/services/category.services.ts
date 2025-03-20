@@ -8,7 +8,7 @@ interface tokenData {
 
 interface categoryData {
     name : string,
-    description? : string
+    description? : string 
 }
 
 export const getAllCategories = async (tokenData : tokenData) => {
@@ -123,4 +123,25 @@ export const deleteCategory = async (tokenData : tokenData , id : string) => {
         console.error(error.message)
         return {Type : "Error" , Message : error.message}
     }
+}
+
+export const getalltasksbycat = async (tokenData : tokenData , id : string) => {
+    try {
+        const {userid , email} = tokenData
+        
+        const getalltasksbycat = await query(
+            `SELECT * FROM tasks
+            WHERE userid = $1 AND categoryid = $2 `, [userid , id])
+        
+        if(getalltasksbycat.rows.length < 1 ){
+            return {Success : false , Message : "Not tasks in this category"}
+        }
+
+        return {Success : false , data : getalltasksbycat.rows}
+
+    } catch (error : any) {
+        console.error(error.message)
+        return {Type : "Error" , Message : error.message}
+    }
+
 }

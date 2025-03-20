@@ -2,6 +2,7 @@ import { AuthRequest } from "../auth/auth.middleware";
 import { Response } from "express-serve-static-core";
 import * as categoryController from "../services/category.services"
 import { Result, validationResult } from "express-validator";
+import { response } from "express";
 
 
 export const getAllCategories = async (request : AuthRequest, response : Response) => {
@@ -45,9 +46,9 @@ export const editCateogry = async (request : AuthRequest, response : Response) =
         return
     }
     try{
-        const tokenData = request.user
-        const {id} = request.params
-        const newData = request.body
+        const tokenData =  await request.user
+        const {id} = await request.params
+        const newData = await request.body
 
         const getOneCategory = await categoryController.getOneCategory(tokenData , id)
         const oldData = getOneCategory.data
@@ -69,13 +70,32 @@ export const deleteCategory = async (request : AuthRequest, response : Response)
     }
 
     try {
-        const tokenData = request.user
-        const { id } = request.params
+        const tokenData = await request.user
+        const { id } = await request.params
 
         const deleteCategory = await categoryController.deleteCategory(tokenData, id)
 
         response.status(202).json(deleteCategory)
     } catch (error : any) {
         response.status(502).json({Errormessage : error.messaage})
+    }
+}
+
+
+export const getTasksByCategory = async (request : AuthRequest, response : Response) => {
+    const errors = validationResult(request)
+    if(!errors.isEmpty()){
+        response.status(400).json({Errors : errors.array().map( err => err.msg )})
+        return
+    }
+    try {
+        const tokenData = await request.user
+        const { id } = await request.params
+
+        const getTasksByCategory = await categoryController.getalltasksbycat(tokenData , id)
+        
+        response.status(200).json(getTasksByCategory)
+    } catch (error : any) {
+        response.status(500).json({Error : error.message})
     }
 }

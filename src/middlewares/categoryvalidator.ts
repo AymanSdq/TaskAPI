@@ -11,6 +11,13 @@ export const categoryValidator = [
         .trim()
 ]
 
+export const taskOncategory = [
+    param("id")
+        .trim()
+        .notEmpty().withMessage("ID of category is required")
+        .isUUID().withMessage("Invalid user ID format. Must be a UUID.")
+]   
+
 export const categoryEditValidator = [
     body("name")
         .optional()
