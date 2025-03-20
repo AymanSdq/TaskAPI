@@ -55,7 +55,7 @@ export const createCategory = async (tokenData : tokenData, categoryData : categ
     }
 }
 
-export const getOneCategory = async(tokenData : tokenData, id : string) => {
+export const getOneCategory = async (tokenData : tokenData, id : string) => {
     try {
         const {userid, email} = tokenData
         
@@ -75,7 +75,7 @@ export const getOneCategory = async(tokenData : tokenData, id : string) => {
     }
 }
 
-export const editCategory = async(tokenData: tokenData , id : string , oldData : categoryData, newData : categoryData) => {
+export const editCategory = async (tokenData: tokenData , id : string , oldData : categoryData, newData : categoryData) => {
     try {
         const {userid, email} = tokenData
         let {name, description} = newData
@@ -100,6 +100,25 @@ export const editCategory = async(tokenData: tokenData , id : string , oldData :
 
         return {Success : true, Message : "Data updated successffully"}
 
+    } catch (error : any) {
+        console.error(error.message)
+        return {Type : "Error" , Message : error.message}
+    }
+}
+
+export const deleteCategory = async (tokenData : tokenData , id : string) => {
+    try {
+        const {userid, email} = tokenData
+
+        const deleteCategory = await query(
+            `DELETE FROM categories
+            WHERE userid = $1 AND categoryid = $2 RETURNING *`, [userid, id])
+
+        if(deleteCategory.rows.length < 1){
+            return {Success : false, Message : "Error while deleting category please try again"}
+        }
+
+        return {Success : true, Message : "Cateogry Deleted Successffully", data : deleteCategory}
     } catch (error : any) {
         console.error(error.message)
         return {Type : "Error" , Message : error.message}

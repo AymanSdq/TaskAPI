@@ -1,7 +1,7 @@
 import { AuthRequest } from "../auth/auth.middleware";
 import { Response } from "express-serve-static-core";
 import * as categoryController from "../services/category.services"
-import { validationResult } from "express-validator";
+import { Result, validationResult } from "express-validator";
 
 
 export const getAllCategories = async (request : AuthRequest, response : Response) => {
@@ -57,6 +57,25 @@ export const editCateogry = async (request : AuthRequest, response : Response) =
         response.status(200).json(updateCategory)
 
     }catch(error : any){
+        response.status(502).json({Errormessage : error.messaage})
+    }
+}
+
+export const deleteCategory = async (request : AuthRequest, response : Response) => {
+    const errros = validationResult(request)
+    if(!errros.isEmpty){
+        response.status(404).json({Errors : errros.array().map( err => err.msg )})
+        return
+    }
+
+    try {
+        const tokenData = request.user
+        const { id } = request.params
+
+        const deleteCategory = await categoryController.deleteCategory(tokenData, id)
+
+        response.status(202).json(deleteCategory)
+    } catch (error : any) {
         response.status(502).json({Errormessage : error.messaage})
     }
 }
