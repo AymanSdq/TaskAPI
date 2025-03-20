@@ -45,7 +45,6 @@ export const loginUser = async ( request : Request, response : Response ) => {
     
     try {
         const {email , password} = request.body
-
         // Services to check the email if existe 
         const userLogin = await userServices.loginService({email, password})
         

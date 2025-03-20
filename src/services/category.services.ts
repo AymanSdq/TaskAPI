@@ -54,3 +54,54 @@ export const createCategory = async (tokenData : tokenData, categoryData : categ
         return {Type : "Error" , Message : error.message}
     }
 }
+
+export const getOneCategory = async(tokenData : tokenData, id : string) => {
+    try {
+        const {userid, email} = tokenData
+        
+        const getOneCategory = await query(
+            `SELECT name, description FROM categories
+            WHERE userid = $1 AND categoryid = $2`, [userid , id])
+
+        if(getOneCategory.rows.length < 1){
+            return {Success : false, Message : "Category not found!"}
+        }
+
+        return { Success : true, data : getOneCategory.rows[0]}
+                
+    } catch (error : any) {
+        console.error(error.message)
+        return {Type : "Error" , Message : error.message}
+    }
+}
+
+export const editCategory = async(tokenData: tokenData , id : string , oldData : categoryData, newData : categoryData) => {
+    try {
+        const {userid, email} = tokenData
+        let {name, description} = newData
+
+        if(!name || name.trim() === ''){
+            name = oldData.name
+        }
+        if(!description || description.trim() === ''){
+            description = oldData.description
+        }
+
+        const updateData = new Date()
+
+        const updateCategory = await query(
+            `UPDATE categories
+            SET name = $1 , description = $2, updated_at = $3 
+            WHERE userid = $4 and categoryid = $5 RETURNING *`, [name, description, updateData, userid, id ])
+
+        if(updateCategory.rows.length < 1){
+            return {Success : false , Message : "Error editing the category Try Again"}
+        }
+
+        return {Success : true, Message : "Data updated successffully"}
+
+    } catch (error : any) {
+        console.error(error.message)
+        return {Type : "Error" , Message : error.message}
+    }
+}
