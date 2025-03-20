@@ -9,6 +9,7 @@ interface authInfo {
 interface taskData {
     title : string,
     description? : string,
+    categoryid? : string,
     status? : "pending" | "in_progress" | "completed",
     priority? : "low" | "medium" | "high",
     due_date?: string;
@@ -37,7 +38,7 @@ export const addTaskService = async (authInfo : authInfo, taksData : taskData ) 
 
     try {
         const {userid , email } = authInfo
-        let { title , description, status, priority , due_date} = taksData
+        let { title , categoryid ,description, status, priority , due_date} = taksData
 
         if(!status || status.trim() === '' ) {
             status = "pending"
@@ -47,9 +48,13 @@ export const addTaskService = async (authInfo : authInfo, taksData : taskData ) 
             priority = "medium"
         }
 
+        if(!categoryid || categoryid.trim() === '' ) {
+            categoryid = ""
+        }
+
         const createTasks = await query(`
-            INSERT INTO tasks (userid, title, description, status, priority , due_date)
-            VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`, [userid, title , description, status, priority ,due_date])
+            INSERT INTO tasks (userid, title, categoryid ,description, status, priority , due_date)
+            VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`, [userid, title , categoryid ,description, status, priority ,due_date])
 
         if(createTasks.rows.length < 0 ){
             return {Success : false, Error : "Error while adding the task"};
@@ -89,12 +94,15 @@ export const updateTask = async (authInfo : authInfo, taskid : string, newData :
     
     try {
         const {userid , email } = await authInfo;
-        let {title , description, status, priority , due_date } = await newData
+        let {title , description, status, priority , due_date, categoryid } = await newData
 
         const updateDate = new Date();
 
         if(!newData.title || newData.title.trim() === ''){
             title = oldData.title
+        }
+        if(!newData.categoryid || newData.categoryid.trim() === ''){
+            categoryid = oldData.categoryid
         }
         if(!newData.description || newData.description.trim() === ''){
             description = oldData.description
@@ -111,8 +119,8 @@ export const updateTask = async (authInfo : authInfo, taskid : string, newData :
 
         const updateTask = await query(
             `UPDATE tasks
-            SET title = $1, description = $2, status = $3, priority = $4 ,due_date = $5 , updated_at = $6
-            WHERE userid = $7 AND taskid = $8 RETURNING *`, [title, description, status, priority ,due_date , updateDate  ,userid, taskid])
+            SET title = $1, categoryid = $2 , description = $3, status = $4, priority = $5 ,due_date = $6 , updated_at = $7
+            WHERE userid = $8 AND taskid = $9 RETURNING *`, [title, categoryid ,description, status, priority ,due_date , updateDate  ,userid, taskid])
 
         if(updateTask.rows.length < 1){
             return {Success : false, Error : "Error while Editing the task"};
