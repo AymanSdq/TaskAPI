@@ -39,3 +39,16 @@ CREATE TABLE categories (
 
     FOREIGN KEY (userid) REFERENCES users(userid) ON DELETE CASCADE
 )
+
+
+
+CREATE TABLE subtasks (
+    subtask UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    taskid UUID NOT NULL,
+    title VARCHAR(50) NOT NULL,
+    status task_status DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+
+    FOREIGN KEY (taskid) REFERENCES tasks(taskid) ON DELETE CASCADE
+)

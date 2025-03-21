@@ -3,6 +3,7 @@ import { Request, Response  } from "express";
 import userRouter from "./routes/user.routes";
 import taskRouter from "./routes/task.routes";
 import categoryRoutes from "./routes/category.routes";
+import subtaskRoutes from "./routes/substask.routes";
 
 
 const app = express();
@@ -15,6 +16,8 @@ app.use("/user", userRouter)
 app.use("/tasks", taskRouter)
 // Categories Router
 app.use("/categories", categoryRoutes)
+// Subtasks
+app.use("/subtasks", subtaskRoutes)
 
 
 app.listen(3000, () => {
