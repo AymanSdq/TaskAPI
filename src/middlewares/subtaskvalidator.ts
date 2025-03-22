@@ -18,3 +18,15 @@ export const subtaskDataValidator = [
         .isIn(['pending', 'in_progress', 'completed']).withMessage("Status must be either 'pending', 'in_progress', 'completed'."),
     
 ]
+
+export const subtaskEditValidator = [
+    body("title")
+        .optional()
+        .trim()
+        .isLength({min : 3}).withMessage("Title must be at least 3 characters"),
+    
+    body("status")
+        .optional()
+        .trim()
+        .isIn(['pending', 'in_progress', 'completed']).withMessage("Status must be either 'pending', 'in_progress', 'completed'."), 
+]
